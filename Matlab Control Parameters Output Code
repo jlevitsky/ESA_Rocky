@@ -53,9 +53,9 @@ Hcloop_sub_R = subs(Hcloop_R) % sub parameter values into Hcloop for right motor
 % specify locations of the target poles,
 % choose # based on order of Htot denominator (Need to find #of poles and specify poles)
 % e.g., want some oscillations, want fast decay, etc. 
-p1 = ;    % dominant pole pair
-p2 = ;    % dominant pole pair 
-p3 = ;
+p1 = -1 + 2*pi*i    % dominant pole pair
+p2 = -1 - 2*pi*i    % dominant pole pair 
+p3 = -10
 % target characteristic polynomial
 % if motor model (TF) is added, order of polynomial will increases
 tgt_char_poly = (s-p1)*(s-p2)*(s-p3)    %We need to determine this value
