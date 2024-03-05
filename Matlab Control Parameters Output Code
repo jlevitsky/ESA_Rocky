@@ -21,31 +21,35 @@
 clear all; 
 close all;
 
-syms s a b leff g tau Kp Ki           % define symbolic variables
+syms s a_r a_l b_l b_r tau_r tau_l leff g   % define symbolic variables
 
 Hvtheta = -s/leff/(s^2-g/leff);       % TF from velocity to angle of pendulum
 
-K = Kp + Ki/s;                        % TF of the PI angle controller
+K = Kp + Ki/s;                  % TF of the PI angle controller
                           
-M = K/tau/(s + 1/tau);                % TF of motor (1st order model) 
-
+M_r = K/tau_r/(s + 1/tau_r);          % TF of motor (1st order model) 
+M_l = K/tau_l/(s + 1/tau_l)
 % closed loop transfer function from disturbance d(t)totheta(t)
-Hcloop = 1/(1-Hvtheta*M*K)    % use this for no motor feedback
+Hcloop_R = 1/(1-Hvtheta*M_r*K)    % use this for no motor feedback
+Hcloop_L = 1/(1-Hvtheta*M_l*K)
 
-pretty(simplify(Hcloop))      % to display the total transfer function
+pretty(simplify(Hcloop_R))       % to display the total transfer function
+pretty(simplify(Hcloop_L))
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Substitute parameters and solve
 % system parameters (Insert calculated values here)
-Kp = ;
-Ki = ;
 g = 9.81;
-leff =   ;      %effective length 
-a = ;           %nominal motor parameters
-b = ;           %nominal motor parameters
-tau = ;
-
-Hcloop_sub = subs(Hcloop) % sub parameter values into Hcloop
-
+leff =    ;              %effective length 
+a_r = 13.19;             %nominal motor parameters
+a_l = 12.96;
+b_r = 0.003267;          %nominal motor parameters
+b_l = 0.003352;
+tau_l = 1/a_l;
+tau_r = 1/b_l;
+%%%%%%%%%%%%
+Hcloop_sub_L = subs(Hcloop_L) % sub parameter values into Hcloop for left motor
+Hcloop_sub_R = subs(Hcloop_R) % sub parameter values into Hcloop for right motor
+%%%%%%%%%%%%%
 % specify locations of the target poles,
 % choose # based on order of Htot denominator (Need to find #of poles and specify poles)
 % e.g., want some oscillations, want fast decay, etc. 
@@ -57,9 +61,9 @@ p3 = ;
 tgt_char_poly = (s-p1)*(s-p2)*(s-p3)    %We need to determine this value
 npoly = 3                               %We need to determine this value
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % get the denominator from Hcloop_sub
-[n d] = numden(Hcloop_sub)
+[n d] = numden(Hcloop_sub_L , Hcloop_sub_R)
 
 % find the coefficients of the denominator polynomial TF
 coeffs_denom = coeffs(d, s)
