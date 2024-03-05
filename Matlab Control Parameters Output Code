@@ -39,7 +39,7 @@ pretty(simplify(Hcloop_L))
 % Substitute parameters and solve
 % system parameters (Insert calculated values here)
 g = 9.81;
-leff =    ;              %effective length 
+leff = 0.41994844287198841974773330815194;   %effective length 
 a_r = 13.19;             %nominal motor parameters
 a_l = 12.96;
 b_r = 0.003267;          %nominal motor parameters
