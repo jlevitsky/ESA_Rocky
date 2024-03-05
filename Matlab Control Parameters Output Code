@@ -63,13 +63,16 @@ npoly = 3                               %We need to determine this value
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % get the denominator from Hcloop_sub
-[n d] = numden(Hcloop_sub_L , Hcloop_sub_R)
+[n_r d_r] = numden(Hcloop_sub_R)
+[n_l d_l] = numden(Hcloop_sub_L)
 
 % find the coefficients of the denominator polynomial TF
-coeffs_denom = coeffs(d, s)
+coeffs_denom_r = coeffs(d_r, s)
+coeffs_denom_l = coeffs(d_l, s)
 
 % divide though the coefficient of the highest power term
-coeffs_denom = coeffs(d, s)/(coeffs_denom(end))
+coeffs_denom_r = coeffs(d_r, s)/(coeffs_denom_r(end))
+coeffs_denom_l = coeffs(d_l, s)/(coeffs_denom_l(end))
 
 % find coefficients of the target charecteristic polynomial
 coeffs_tgt = coeffs(tgt_char_poly, s)
@@ -82,12 +85,16 @@ solutions = solve(coeffs_denom(1:npoly-1) == coeffs_tgt(1:npoly-1),  Kp, Ki)
 Kp = double(solutions.Kp)
 Ki = double(solutions.Ki)
 
-% reorder coefficients for the check polynomial 
-for ii = 1:length(coeffs_denom)
-    chk_coeffs_denom(ii) = coeffs_denom(length(coeffs_denom) + 1 - ii);
+% reorder coefficients for the check polynomial (right)
+for ii = 1:length(coeffs_denom_r)
+    chk_coeffs_denom_r(ii) = coeffs_denom_r(length(coeffs_denom_r) + 1 - ii);
 end
-closed_loop_poles = vpa (roots(subs(chk_coeffs_denom)), npoly )
-
+closed_loop_poles = vpa (roots(subs(chk_coeffs_denom_r)), npoly )
+% reorder coefficients for the check polynomial (left)
+for ii = 1:length(coeffs_denom_l)
+    chk_coeffs_denom_l(ii) = coeffs_denom_l(length(coeffs_denom_l) + 1 - ii);
+end
+closed_loop_poles = vpa (roots(subs(chk_coeffs_denom_l)), npoly )
 
 % Plot impulse response of closed-loop system
     TFstring = char(subs(Hcloop));
