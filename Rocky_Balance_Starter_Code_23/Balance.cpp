@@ -209,6 +209,7 @@ void balanceResetEncoders()
   distanceRight = 0;
 }
 uint32_t delta_ms = 0;
+
 void balanceUpdateSensors()
 {
   static uint32_t prev_ms = 0;

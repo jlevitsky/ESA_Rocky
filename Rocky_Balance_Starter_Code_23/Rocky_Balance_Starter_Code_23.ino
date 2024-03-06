@@ -56,10 +56,11 @@ float angle_prev_rad = 0; // previous angle measurement
 extern int32_t displacement;
 int32_t prev_displacement=0;
 uint32_t prev_time;
+
+float angle_err_accum = 0;
+float desAngle = 0;
  
 #define G_RATIO (162.5)
-
-
 
 LSM6 imu;
 Balboa32U4Motors motors;
@@ -69,9 +70,6 @@ Balboa32U4ButtonA buttonA;
 
 
 #define FIXED_ANGLE_CORRECTION (0.3)  // ***** Replace the value 0.25 with the value you obtained from the Gyro calibration procedure
-
-
-
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -86,16 +84,21 @@ void BalanceRocky()
 
     // **************Enter the control parameters here
     
-  float Kp_left = 1454.8;
-  float Kp_right = 1336.2;
-  float Ki_left = 5875.9;
-  float Ki_right = 5629.4;
-
+  //float Kp_v = 1336.2;
+  //float Ki_v = 5629.4;
+  //float Kp_v = 3800;
+  //float Ki_v = 17000;
+  float Kp_v = 2000;
+  float Ki_v = 10000;
+  float Kp_a = 0.03;
+  float Ki_a = 0.12;
 
 
 
     float v_c_L, v_c_R; // these are the control velocities to be sent to the motors
     float v_d = 0; // this is the desired speed produced by the angle controller
+    float angle_tgt = 0; // Target angle that the robot balances to
+    float angle_err; // Difference between target angle and current angle
 
 
    // Variables available to you are: 
@@ -107,28 +110,26 @@ void BalanceRocky()
    // distRight_m - distance traveled by right wheel in meters  (this is the integral of the velocities) 
    // dist_accum - integral of the distance
 
-   // *** enter an equation for v_d in terms of the variables available ****
-    v_d =  .1; // this is the desired velocity from the angle controller 
-      
-
-  // The next two lines implement the feedback controller for the motor. Two separate velocities are calculated. 
-  //
-  //
-  // We use a trick here by criss-crossing the distance from left to right and 
-  // right to left. This helps ensure that the Left and Right motors are balanced
-
   // *** enter equations for input signals for v_c (left and right) in terms of the variables available ****
-    v_c_R = -Kp_right*angle_rad+Ki_right*angle_rad_accum;
-    v_c_L = Kp_left*angle_rad+Ki_left*angle_rad_accum;    
 
 
+    angle_tgt = -(Kp_a * (measured_speedL + measured_speedR)/2 + Ki_a * (distLeft_m + distRight_m)/2);
 
+    if(angle_tgt > 0.04) angle_tgt = 0.04;
+    if(angle_tgt < -0.04) angle_tgt = -0.04;
 
+    angle_err = angle_rad - angle_tgt;
+    angle_err_accum += angle_err * 0.01; // accumulate angle error
+
+    v_c_R = (Kp_v*angle_err + Ki_v*angle_err_accum);
+    v_c_L = (Kp_v*angle_err + Ki_v*angle_err_accum);    
 
 
     // save desired speed for debugging
     desSpeedL = v_c_L;
     desSpeedR = v_c_R;
+
+    desAngle = angle_tgt;
 
     // the motor control signal has to be between +- 300. So clip the values to be within that range 
     // here
@@ -295,16 +296,11 @@ void loop()
     start_flag = 0;
   } 
 
-// kill switch
-  if(buttonA.getSingleDebouncedPress())
-  {
-      motors.setSpeeds(0,0);
-      while(!buttonA.getSingleDebouncedPress());
-  }
-
 if(cur_time - prev_print_time > 103)   // do the printing every 105 ms. Don't want to do it for an integer multiple of 10ms to not hog the processor
   {
         Serial.print(angle_rad);   
+        Serial.print("\t");
+        Serial.print(desAngle);
         Serial.print("\t");
         Serial.print(distLeft_m);
         Serial.print("\t");

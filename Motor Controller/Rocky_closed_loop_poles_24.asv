@@ -38,18 +38,18 @@ pretty(simplify(Hcloop))       % to display the total transfer function
 % Substitute parameters and solve
 % system parameters
 g = 9.81;
-l = 22*2.54/100   %effective length 
-a = 13.075;           %nominal motor parameters
-b = 0.0033095;        %nominal motor parameters
+l = 0.41994844287198841974773330815194  %effective length 
+a = 14.09;           %nominal motor parameters
+b = 0.002962;        %nominal motor parameters
 
 Hcloop_sub = subs(Hcloop) % sub parameter values into Hcloop
 
 % specify locations of the target poles,
 % choose # based on order of Htot denominator
 % e.g., want some oscillations, want fast decay, etc. 
-p1 = -1 + 2*pi*i    % dominant pole pair
-p2 = -1 - 2*pi*i    % dominant pole pair 
-p3 = -10
+p1 = -3.5 + 6*1i;    % dominant pole pair
+p2 = -3.5 - 2.18*1i;   % dominant pole pair 
+p3 = -10;
 
 
 % target characteristic polynomial
