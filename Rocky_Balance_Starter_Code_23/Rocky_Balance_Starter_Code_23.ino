@@ -88,10 +88,10 @@ void BalanceRocky()
   //float Ki_v = 5629.4;
   //float Kp_v = 3800;
   //float Ki_v = 17000;
-  float Kp_v = 2000;
-  float Ki_v = 10000;
-  float Kp_a = 0.03;
-  float Ki_a = 0.12;
+  float Kp_v = 1800;
+  float Ki_v = 13000;
+  float Kp_a = 0.04;
+  float Ki_a = 0.15;
 
 
 
@@ -115,8 +115,8 @@ void BalanceRocky()
 
     angle_tgt = -(Kp_a * (measured_speedL + measured_speedR)/2 + Ki_a * (distLeft_m + distRight_m)/2);
 
-    if(angle_tgt > 0.04) angle_tgt = 0.04;
-    if(angle_tgt < -0.04) angle_tgt = -0.04;
+    //if(angle_tgt > 0.1) angle_tgt = 0.1;
+    //if(angle_tgt < -0.1) angle_tgt = -0.1;
 
     angle_err = angle_rad - angle_tgt;
     angle_err_accum += angle_err * 0.01; // accumulate angle error
@@ -277,7 +277,7 @@ void loop()
   {
     GetMotorAndAngleMeasurements();
     if(enableLongTermGyroCorrection)
-      del_theta = 0.999*del_theta + 0.001*angle_rad;  // assume that the robot is standing. Smooth out the angle to correct for long-term gyro drift
+      del_theta = 0.998*del_theta + 0.002*angle_rad;  // assume that the robot is standing. Smooth out the angle to correct for long-term gyro drift
     
     // Control the robot
     BalanceRocky();
